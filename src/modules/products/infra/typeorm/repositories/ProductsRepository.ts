@@ -33,7 +33,7 @@ class ProductsRepository implements IProductsRepository {
   }
 
   public async findByName(name: string): Promise<Product | undefined> {
-    const findProduct = this.ormRepository.findOne({
+    const findProduct = await this.ormRepository.findOne({
       where: {
         name,
       },
@@ -43,7 +43,7 @@ class ProductsRepository implements IProductsRepository {
   }
 
   public async findAllById(products: IFindProducts[]): Promise<Product[]> {
-    const findProducts = this.ormRepository.find({
+    const findProducts = await this.ormRepository.find({
       where: {
         name: In([products]),
       },
