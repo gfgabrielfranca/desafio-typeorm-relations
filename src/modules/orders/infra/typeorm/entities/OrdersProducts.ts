@@ -11,6 +11,7 @@ import {
 import Order from '@modules/orders/infra/typeorm/entities/Order';
 import Product from '@modules/products/infra/typeorm/entities/Product';
 
+@Entity()
 class OrdersProducts {
   id: string;
 
