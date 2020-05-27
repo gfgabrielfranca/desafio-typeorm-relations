@@ -22,7 +22,8 @@ class CreateProductService {
   constructor(
     @inject('OrdersRepository')
     private ordersRepository: IOrdersRepository,
-    // private productsRepository: IProductsRepository,
+    @inject('ProductsRepository')
+    private productsRepository: IProductsRepository,
     @inject('CustomersRepository')
     private customersRepository: ICustomersRepository,
   ) {}
@@ -34,9 +35,25 @@ class CreateProductService {
       throw new AppError('Customer do not exists.');
     }
 
+    const findProducts = await this.productsRepository.findAllById(
+      products.map(product => ({ id: product.id })),
+    );
+
+    if (!findProducts.length) {
+      throw new AppError('Product do not exists.');
+    }
+
+    const insufficientProduct = findProducts.find(
+      (findProduct, index) => findProduct.quantity < products[index].quantity,
+    );
+
+    if (insufficientProduct) {
+      throw new AppError('Product do not have sufficient quantity.');
+    }
+
     const order = await this.ordersRepository.create({
       customer,
-      products: [],
+      products: findProducts,
     });
 
     return order;

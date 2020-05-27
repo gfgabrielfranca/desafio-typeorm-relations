@@ -1,8 +1,9 @@
-import { getRepository, Repository } from 'typeorm';
+import { getRepository, Repository, getConnection } from 'typeorm';
 
 import IOrdersRepository from '@modules/orders/repositories/IOrdersRepository';
 import ICreateOrderDTO from '@modules/orders/dtos/ICreateOrderDTO';
 import Order from '../entities/Order';
+import OrdersProducts from '../entities/OrdersProducts';
 
 class OrdersRepository implements IOrdersRepository {
   private ormRepository: Repository<Order>;
@@ -17,6 +18,20 @@ class OrdersRepository implements IOrdersRepository {
     });
 
     await this.ormRepository.save(order);
+
+    await getConnection()
+      .createQueryBuilder()
+      .insert()
+      .into(OrdersProducts)
+      .values(
+        products.map(product => ({
+          product_id: product.id,
+          order_id: order.id,
+          price: product.price * product.quantity,
+          quantity: product.quantity,
+        })),
+      )
+      .execute();
 
     return order;
   }
